@@ -2,8 +2,11 @@ package com.wishlist.ai.config;
 
 import com.wishlist.ai.domain.PriceComparison;
 import com.wishlist.ai.domain.Product;
+import com.wishlist.ai.domain.Role;
+import com.wishlist.ai.domain.User;
 import com.wishlist.ai.repository.PriceComparisonRepository;
 import com.wishlist.ai.repository.ProductRepository;
+import com.wishlist.ai.repository.UserRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
@@ -51,10 +54,24 @@ public class DataSeeder {
 
     private final ProductRepository productRepository;
     private final PriceComparisonRepository priceComparisonRepository;
+    private final UserRepository userRepository;
 
     @Bean
     CommandLineRunner seedMongoData() {
         return args -> {
+            // Seed users first
+            Map<String, User> existingUsersByEmail = userRepository.findAll().stream()
+                    .collect(Collectors.toMap(user -> normalize(user.getEmail()), Function.identity(), (left, right) -> left));
+
+            for (var seed : userSeeds()) {
+                User savedUser = existingUsersByEmail.get(normalize(seed.email()));
+                if (savedUser == null) {
+                    savedUser = userRepository.save(buildUser(seed));
+                    existingUsersByEmail.put(normalize(seed.email()), savedUser);
+                }
+            }
+
+            // Seed products
             Map<String, Product> existingByName = productRepository.findAll().stream()
                     .collect(Collectors.toMap(product -> normalize(product.getName()), Function.identity(), (left, right) -> left));
 
@@ -85,6 +102,29 @@ public class DataSeeder {
                         comparison.shippingCost(),
                         comparison.confidence()))
                 .forEach(priceComparisonRepository::save);
+    }
+
+    private User buildUser(UserSeed seed) {
+        var user = new User();
+        user.setFullName(seed.fullName());
+        user.setEmail(seed.email());
+        user.setPassword(seed.password());
+        user.setRole(seed.role());
+        return user;
+    }
+
+    private List<UserSeed> userSeeds() {
+        return List.of(
+                seedUser("John Doe", "john.doe@example.com", "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", Role.ROLE_USER), // password: password
+                seedUser("Jane Smith", "jane.smith@example.com", "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", Role.ROLE_USER), // password: password
+                seedUser("Admin User", "admin@example.com", "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", Role.ROLE_ADMIN), // password: password
+                seedUser("Alice Johnson", "alice.johnson@example.com", "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", Role.ROLE_USER), // password: password
+                seedUser("Bob Wilson", "bob.wilson@example.com", "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", Role.ROLE_USER)  // password: password
+        );
+    }
+
+    private UserSeed seedUser(String fullName, String email, String password, Role role) {
+        return new UserSeed(fullName, email, password, role);
     }
 
     private Product buildProduct(ProductSeed seed) {
@@ -212,5 +252,8 @@ public class DataSeeder {
     }
 
     private record ComparisonSeed(String platform, String url, String listedPrice, String shippingCost, String confidence) {
+    }
+
+    private record UserSeed(String fullName, String email, String password, Role role) {
     }
 }
