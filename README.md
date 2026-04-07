@@ -129,6 +129,8 @@ ALLOWED_ORIGINS=http://localhost:5173
 OPENAI_API_KEY=optional
 ```
 
+For Atlas, use your connection string instead of the localhost URI. Keep credentials out of source control by storing them in a local `backend/.env` file or in your deployment environment.
+
 ## Production Notes
 
 - Add Mongo migrations with Mongock or a similar migration tool if you want versioned schema changes

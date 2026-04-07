@@ -17,6 +17,14 @@ Default backend connection:
 MONGODB_URI=mongodb://localhost:27017/wishlist_ai
 ```
 
+For MongoDB Atlas, set the same variable with your connection string instead:
+
+```bash
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.ndmlqpy.mongodb.net/wishlist_ai?retryWrites=true&w=majority
+```
+
+Create a local `backend/.env` file from `backend/.env.example` and do not commit it to git.
+
 ## Run Backend
 
 ```bash
