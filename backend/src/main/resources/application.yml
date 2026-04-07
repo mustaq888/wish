@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: wishlist-price-comparison-api
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/wishlist_ai}
+  sql:
+    init:
+      mode: never
+
+server:
+  port: ${SERVER_PORT:8080}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:please-change-this-in-production-please-change-this-in-production}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:120}
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+  ai:
+    image-provider: ${AI_IMAGE_PROVIDER:mock}
+    openai-api-key: ${OPENAI_API_KEY:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
