@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import axios from "axios";
 
 function resolveApiBaseUrl() {
@@ -20,7 +21,10 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("wishlist-token");
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers = config.headers ?? {};
+    if (typeof config.headers === "object") {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 });
