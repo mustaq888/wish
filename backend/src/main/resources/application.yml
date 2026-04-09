@@ -20,7 +20,7 @@ app:
     secret: ${JWT_SECRET:please-change-this-in-production-please-change-this-in-production}
     expiration-minutes: ${JWT_EXPIRATION_MINUTES:120}
   cors:
-    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,https://wish-wine-gamma.vercel.app}
   ai:
     image-provider: ${AI_IMAGE_PROVIDER:mock}
     openai-api-key: ${OPENAI_API_KEY:}
