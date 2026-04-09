@@ -139,6 +139,31 @@ For Atlas, use your connection string instead of the localhost URI. Keep credent
 - Add Redis if you want distributed caching
 - Add integration tests for auth and wishlist workflows
 
+## Deploy Backend On Render
+
+This repo now includes a root [render.yaml](/e:/wish/render.yaml) for the Spring backend.
+
+Steps:
+
+1. In Render, create a new Blueprint or Web Service from this GitHub repo.
+2. Render should detect `render.yaml` and create the `wish-backend` service from `backend/Dockerfile`.
+3. In Render, set:
+   `MONGODB_URI` = your MongoDB Atlas connection string
+4. After deploy, copy the public backend URL, for example:
+   `https://wish-backend.onrender.com`
+5. In Vercel, add:
+   `VITE_API_BASE_URL=https://your-render-backend-url`
+6. Redeploy the Vercel frontend.
+
+Notes:
+
+- The backend now supports platform-provided `PORT` automatically.
+- Default CORS already includes `https://wish-wine-gamma.vercel.app`.
+- Any Vercel environment variable change only applies to new deployments, according to Vercel docs:
+  https://vercel.com/docs/environment-variables
+- Render Blueprints are configured through `render.yaml`, according to Render docs:
+  https://render.com/docs/blueprint-spec
+
 ## Version Notes
 
 Version choices were aligned to official docs/pages current on April 7, 2026:
