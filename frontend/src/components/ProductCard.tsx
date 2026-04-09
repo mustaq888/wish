@@ -28,7 +28,7 @@ export function ProductCard({ product, onCompare, onAddToWishlist, disableWishli
         <div className="rounded-2xl bg-slate-50 p-4">
           <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Best live price</p>
           <div className="mt-2 flex items-center justify-between">
-            <span className="text-2xl font-bold text-ink">{cheapest?.totalPrice?.toFixed(2) ?? product.basePrice.toFixed(2)}</span>
+            <span className="text-2xl font-bold text-ink">${cheapest?.totalPrice?.toFixed(2) ?? product.basePrice.toFixed(2)}</span>
             <span className="text-sm text-slate-500">{cheapest?.platformName ?? "Direct"}</span>
           </div>
           <p className="mt-2 text-sm text-slate-500">AI forecast: ${product.predictedNextPrice.toFixed(2)}</p>
