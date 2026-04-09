@@ -11,7 +11,7 @@ function resolveApiBaseUrl() {
     return "http://localhost:8080";
   }
 
-  return "http://localhost:8080";
+  return "";
 }
 
 const api = axios.create({

@@ -1,3 +1,4 @@
+import { formatInr } from "../currency";
 import { WishlistItem } from "../types";
 
 type MarketplaceWishlistPanelProps = {
@@ -16,7 +17,7 @@ export function MarketplaceWishlistPanel({ items }: MarketplaceWishlistPanelProp
       </div>
       <div className="space-y-3">
         {items.length === 0 ? (
-          <p className="text-slate-500">Log in to load your wishlist from the JWT-protected API.</p>
+          <p className="text-slate-500">Log in to load your wishlist from the database-backed API.</p>
         ) : (
           items.map((item) => (
             <div key={item.wishlistItemId} className="flex items-center gap-4 rounded-2xl border border-slate-100 p-3">
@@ -26,8 +27,8 @@ export function MarketplaceWishlistPanel({ items }: MarketplaceWishlistPanelProp
                 <p className="text-sm text-slate-500">{item.brand} • {item.category}</p>
               </div>
               <div className="text-right">
-                <p className="font-bold text-ink">${item.price.toFixed(2)}</p>
-                <p className="text-xs text-coral">Predicted ${item.predictedNextPrice.toFixed(2)}</p>
+                <p className="font-bold text-ink">{formatInr(item.price)}</p>
+                <p className="text-xs text-coral">Predicted {formatInr(item.predictedNextPrice)}</p>
               </div>
             </div>
           ))

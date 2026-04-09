@@ -6,8 +6,9 @@ import { MarketplaceComparisonTable } from "./components/MarketplaceComparisonTa
 import { MarketplaceWishlistPanel } from "./components/MarketplaceWishlistPanel";
 import { MarketplaceRecommendationsPanel } from "./components/MarketplaceRecommendationsPanel";
 import { AuthPanel } from "./components/AuthPanel";
-import { useAddToWishlist, useCompare, useLogin, useProducts, useRegister, useTrending, useWishlist } from "./hooks";
-import { ProductFilters } from "./types";
+import { useAddToWishlist, useCompare, useCurrentUser, useLogin, useProducts, useRegister, useTrending, useWishlist } from "./hooks";
+import { formatInr } from "./currency";
+import { CurrentUser, ProductFilters } from "./types";
 
 const categories = ["Computers", "Mobiles", "Audio", "Television", "Household", "Kitchen", "Appliances", "Furniture", "Fashion", "Beauty"];
 
@@ -19,27 +20,50 @@ const defaultFilters: ProductFilters = {
 };
 
 export default function App() {
-  const [authenticated, setAuthenticated] = useState(Boolean(localStorage.getItem("wishlist-token")));
+  const [token, setToken] = useState(() => localStorage.getItem("wishlist-token"));
   const [selectedProductId, setSelectedProductId] = useState<string | undefined>();
   const [draftFilters, setDraftFilters] = useState<ProductFilters>(defaultFilters);
   const [appliedFilters, setAppliedFilters] = useState<ProductFilters>(defaultFilters);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const authenticated = Boolean(token);
   const productsQuery = useProducts(appliedFilters);
   const compareQuery = useCompare(selectedProductId);
   const trendingQuery = useTrending();
+  const currentUserQuery = useCurrentUser(authenticated);
   const wishlistQuery = useWishlist(authenticated);
   const loginMutation = useLogin();
   const registerMutation = useRegister();
   const addToWishlistMutation = useAddToWishlist();
 
   useEffect(() => {
-    if (!authenticated) {
-      localStorage.removeItem("wishlist-token");
+    if (token) {
+      localStorage.setItem("wishlist-token", token);
+      return;
     }
-  }, [authenticated]);
+    setCurrentUser(null);
+    localStorage.removeItem("wishlist-token");
+  }, [token]);
 
-  function handleAuthSuccess(token: string) {
-    localStorage.setItem("wishlist-token", token);
-    setAuthenticated(true);
+  useEffect(() => {
+    if (currentUserQuery.data) {
+      setCurrentUser(currentUserQuery.data);
+    }
+  }, [currentUserQuery.data]);
+
+  useEffect(() => {
+    if (currentUserQuery.isError) {
+      localStorage.removeItem("wishlist-token");
+      setToken(null);
+    }
+  }, [currentUserQuery.isError]);
+
+  function handleAuthSuccess(auth: { token: string; userId: string; fullName: string; email: string }) {
+    setToken(auth.token);
+    setCurrentUser({
+      userId: auth.userId,
+      fullName: auth.fullName,
+      email: auth.email
+    });
   }
 
   const products = productsQuery.data?.content ?? [];
@@ -49,7 +73,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,_#eef4ff_0%,_#fff7e8_28%,_#f8fafc_58%,_#fffdfa_100%)] pb-16">
-      <Header authenticated={authenticated} onLogout={() => setAuthenticated(false)} productCount={totalProducts} categoryCount={categories.length} />
+      <Header authenticated={authenticated} userName={currentUser?.fullName} onLogout={() => setToken(null)} productCount={totalProducts} categoryCount={categories.length} />
 
       <main className="mx-auto flex max-w-7xl flex-col gap-8 px-6 py-8">
         <section className="grid gap-6 lg:grid-cols-[1.45fr_0.9fr]">
@@ -92,7 +116,7 @@ export default function App() {
             <div className="rounded-[2rem] bg-ink p-5 text-white shadow-soft">
               <p className="text-sm text-slate-300">Featured deal</p>
               <p className="mt-3 text-2xl font-bold">{heroProduct?.name ?? "Loading..."}</p>
-              <p className="mt-2 text-sm text-slate-300">{bestDeal ? `${bestDeal.platformName} from $${bestDeal.totalPrice.toFixed(2)}` : "Comparisons loading"}</p>
+              <p className="mt-2 text-sm text-slate-300">{bestDeal ? `${bestDeal.platformName} from ${formatInr(bestDeal.totalPrice)}` : "Comparisons loading"}</p>
             </div>
             <div className="rounded-[2rem] bg-white p-5 shadow-soft">
               <p className="text-sm text-slate-500">Search ready</p>
@@ -105,8 +129,8 @@ export default function App() {
         {!authenticated && (
           <AuthPanel
             loading={loginMutation.isPending || registerMutation.isPending}
-            onLogin={(payload) => loginMutation.mutate(payload, { onSuccess: (data) => handleAuthSuccess(data.token) })}
-            onRegister={(payload) => registerMutation.mutate(payload, { onSuccess: (data) => handleAuthSuccess(data.token) })}
+            onLogin={(payload) => loginMutation.mutate(payload, { onSuccess: (data) => handleAuthSuccess(data) })}
+            onRegister={(payload) => registerMutation.mutate(payload, { onSuccess: (data) => handleAuthSuccess(data) })}
           />
         )}
 

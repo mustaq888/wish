@@ -1,12 +1,16 @@
 package com.wishlist.ai.controller;
 
 import com.wishlist.ai.dto.auth.AuthResponse;
+import com.wishlist.ai.dto.auth.CurrentUserResponse;
 import com.wishlist.ai.dto.auth.LoginRequest;
 import com.wishlist.ai.dto.auth.RegisterRequest;
+import com.wishlist.ai.security.AppUserDetails;
 import com.wishlist.ai.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,5 +33,10 @@ public class AuthController {
     @PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @GetMapping("/me")
+    public CurrentUserResponse me(@AuthenticationPrincipal AppUserDetails user) {
+        return new CurrentUserResponse(user.getId(), user.getFullName(), user.getEmail());
     }
 }

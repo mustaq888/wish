@@ -1,3 +1,4 @@
+import { formatInr } from "../currency";
 import { Comparison } from "../types";
 
 type MarketplaceComparisonTableProps = {
@@ -20,9 +21,7 @@ export function MarketplaceComparisonTable({ data }: MarketplaceComparisonTableP
           <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Comparison table</p>
           <h2 className="font-display text-2xl font-bold text-ink">{data.productName}</h2>
         </div>
-        <p className="rounded-full bg-coral/10 px-4 py-2 text-sm font-semibold text-coral">
-          AI next-price forecast: ${data.predictedNextPrice.toFixed(2)}
-        </p>
+        <p className="rounded-full bg-coral/10 px-4 py-2 text-sm font-semibold text-coral">AI next-price forecast: {formatInr(data.predictedNextPrice)}</p>
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full text-left text-sm">
@@ -40,9 +39,9 @@ export function MarketplaceComparisonTable({ data }: MarketplaceComparisonTableP
             {data.platforms.map((platform) => (
               <tr key={platform.platformName} className="border-b border-slate-100">
                 <td className="py-4 font-semibold text-ink">{platform.platformName}</td>
-                <td className="py-4">${platform.listedPrice.toFixed(2)}</td>
-                <td className="py-4">${platform.shippingCost.toFixed(2)}</td>
-                <td className="py-4 font-bold text-coral">${platform.totalPrice.toFixed(2)}</td>
+                <td className="py-4">{formatInr(platform.listedPrice)}</td>
+                <td className="py-4">{formatInr(platform.shippingCost)}</td>
+                <td className="py-4 font-bold text-coral">{formatInr(platform.totalPrice)}</td>
                 <td className="py-4">{platform.inStock ? "In Stock" : "Out of Stock"}</td>
                 <td className="py-4 text-right">
                   <a className="rounded-full bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-700" href={platform.productUrl} target="_blank" rel="noreferrer">

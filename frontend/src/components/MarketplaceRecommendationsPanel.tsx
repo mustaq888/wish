@@ -1,3 +1,4 @@
+import { formatInr } from "../currency";
 import { Recommendation } from "../types";
 
 type MarketplaceRecommendationsPanelProps = {
@@ -15,7 +16,7 @@ export function MarketplaceRecommendationsPanel({ items }: MarketplaceRecommenda
             <img className="mb-4 h-36 w-full rounded-[1.25rem] object-cover" src={item.imageUrl} alt={item.name} />
             <h3 className="font-semibold">{item.name}</h3>
             <p className="mt-2 text-sm text-slate-300">{item.reason}</p>
-            <p className="mt-4 font-bold text-coral">${item.price.toFixed(2)}</p>
+            <p className="mt-4 font-bold text-coral">{formatInr(item.price)}</p>
           </article>
         ))}
       </div>

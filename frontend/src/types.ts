@@ -70,3 +70,9 @@ export type Comparison = {
   predictedNextPrice: number;
   platforms: PlatformPrice[];
 };
+
+export type CurrentUser = {
+  userId: string;
+  fullName: string;
+  email: string;
+};
