@@ -31,7 +31,7 @@ export function ProductCard({ product, onCompare, onAddToWishlist, disableWishli
             <span className="text-2xl font-bold text-ink">{cheapest?.totalPrice?.toFixed(2) ?? product.basePrice.toFixed(2)}</span>
             <span className="text-sm text-slate-500">{cheapest?.platformName ?? "Direct"}</span>
           </div>
-          <p className="mt-2 text-sm text-slate-500">AI forecast: ${product.predictedNextPrice.toFixed(2)}</p>
+          <p className="mt-2 text-sm text-slate-500">AI forecast: {product.predictedNextPrice.toFixed(2)}</p>
         </div>
         <div className="flex gap-3">
           <button className="flex-1 rounded-2xl bg-ink px-4 py-3 font-semibold text-white" onClick={() => onCompare(product.id)}>
