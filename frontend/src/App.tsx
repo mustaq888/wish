@@ -5,7 +5,7 @@ import { MarketplaceProductCard } from "./components/MarketplaceProductCard";
 import { MarketplaceComparisonTable } from "./components/MarketplaceComparisonTable";
 import { MarketplaceWishlistPanel } from "./components/MarketplaceWishlistPanel";
 import { MarketplaceRecommendationsPanel } from "./components/MarketplaceRecommendationsPanel";
-import { AuthPanel } from "./components/AuthPanel";
+import { AuthPage } from "./components/AuthPage";
 import { useAddToWishlist, useCompare, useCurrentUser, useLogin, useProducts, useRegister, useTrending, useWishlist } from "./hooks";
 import { formatInr } from "./currency";
 import { CurrentUser, ProductFilters } from "./types";
@@ -21,6 +21,7 @@ const defaultFilters: ProductFilters = {
 
 export default function App() {
   const [token, setToken] = useState(() => localStorage.getItem("wishlist-token"));
+  const [currentPath, setCurrentPath] = useState(() => window.location.pathname || "/");
   const [selectedProductId, setSelectedProductId] = useState<string | undefined>();
   const [draftFilters, setDraftFilters] = useState<ProductFilters>(defaultFilters);
   const [appliedFilters, setAppliedFilters] = useState<ProductFilters>(defaultFilters);
@@ -34,6 +35,15 @@ export default function App() {
   const loginMutation = useLogin();
   const registerMutation = useRegister();
   const addToWishlistMutation = useAddToWishlist();
+
+  useEffect(() => {
+    function handlePopState() {
+      setCurrentPath(window.location.pathname || "/");
+    }
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   useEffect(() => {
     if (token) {
@@ -64,17 +74,82 @@ export default function App() {
       fullName: auth.fullName,
       email: auth.email
     });
+    navigate("/wishlist");
+  }
+
+  function navigate(path: string) {
+    if (path === currentPath) {
+      return;
+    }
+    window.history.pushState({}, "", path);
+    setCurrentPath(path);
   }
 
   const products = productsQuery.data?.content ?? [];
   const totalProducts = productsQuery.data?.totalElements ?? 0;
   const heroProduct = products[0];
   const bestDeal = heroProduct?.comparisons[0];
+  const authLoading = loginMutation.isPending || registerMutation.isPending;
+  const isWishlistPage = currentPath === "/wishlist";
+  const isLoginPage = currentPath === "/login";
+  const isRegisterPage = currentPath === "/register";
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,_#eef4ff_0%,_#fff7e8_28%,_#f8fafc_58%,_#fffdfa_100%)] pb-16">
-      <Header authenticated={authenticated} userName={currentUser?.fullName} onLogout={() => setToken(null)} productCount={totalProducts} categoryCount={categories.length} />
+      <Header
+        authenticated={authenticated}
+        userName={currentUser?.fullName}
+        onLogout={() => setToken(null)}
+        productCount={totalProducts}
+        categoryCount={categories.length}
+        currentPath={currentPath}
+        onNavigate={navigate}
+      />
 
+      {isLoginPage || isRegisterPage ? (
+        <AuthPage
+          mode={isLoginPage ? "login" : "register"}
+          loading={authLoading}
+          onLogin={(payload) => loginMutation.mutate(payload, { onSuccess: (data) => handleAuthSuccess(data) })}
+          onRegister={(payload) => registerMutation.mutate(payload, { onSuccess: (data) => handleAuthSuccess(data) })}
+          onNavigate={navigate}
+        />
+      ) : isWishlistPage ? (
+        <main className="mx-auto flex max-w-7xl flex-col gap-8 px-6 py-8">
+          <section className="rounded-[2.6rem] bg-white p-8 shadow-soft">
+            <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Wishlist page</p>
+            <h1 className="mt-3 font-display text-4xl font-extrabold text-ink">
+              {authenticated ? "Your saved products" : "Login to open your wishlist"}
+            </h1>
+            <p className="mt-3 max-w-2xl text-slate-500">
+              {authenticated
+                ? "Review everything you saved, compare prices, and head back to the product list when you want to add more."
+                : "Your wishlist is tied to your account. Login or register to save products and revisit them later."}
+            </p>
+            {!authenticated && (
+              <div className="mt-6 flex flex-wrap gap-3">
+                <button className="rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white" onClick={() => navigate("/login")} type="button">
+                  Go to Login
+                </button>
+                <button className="rounded-full border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700" onClick={() => navigate("/register")} type="button">
+                  Create account
+                </button>
+              </div>
+            )}
+          </section>
+
+          <section className="grid gap-6 xl:grid-cols-[1.4fr_0.6fr]">
+            <MarketplaceComparisonTable data={compareQuery.data} />
+            <MarketplaceWishlistPanel items={wishlistQuery.data ?? []} />
+          </section>
+
+          {trendingQuery.isLoading ? (
+            <section className="rounded-[2rem] bg-ink p-6 text-white shadow-soft">Loading recommendations...</section>
+          ) : (
+            <MarketplaceRecommendationsPanel items={trendingQuery.data ?? []} />
+          )}
+        </main>
+      ) : (
       <main className="mx-auto flex max-w-7xl flex-col gap-8 px-6 py-8">
         <section className="grid gap-6 lg:grid-cols-[1.45fr_0.9fr]">
           <div className="overflow-hidden rounded-[2.6rem] bg-gradient-to-br from-sky-700 via-sky-600 to-cyan-500 p-8 text-white shadow-soft">
@@ -125,14 +200,6 @@ export default function App() {
             </div>
           </div>
         </section>
-
-        {!authenticated && (
-          <AuthPanel
-            loading={loginMutation.isPending || registerMutation.isPending}
-            onLogin={(payload) => loginMutation.mutate(payload, { onSuccess: (data) => handleAuthSuccess(data) })}
-            onRegister={(payload) => registerMutation.mutate(payload, { onSuccess: (data) => handleAuthSuccess(data) })}
-          />
-        )}
 
         <SearchFilters
           filters={draftFilters}
@@ -195,6 +262,7 @@ export default function App() {
           <MarketplaceRecommendationsPanel items={trendingQuery.data ?? []} />
         )}
       </main>
+      )}
     </div>
   );
 }
