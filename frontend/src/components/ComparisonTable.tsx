@@ -21,7 +21,7 @@ export function ComparisonTable({ data }: ComparisonTableProps) {
           <h2 className="font-display text-2xl font-bold text-ink">{data.productName}</h2>
         </div>
         <p className="rounded-full bg-coral/10 px-4 py-2 text-sm font-semibold text-coral">
-          AI next-price forecast: {data.predictedNextPrice.toFixed(2)}
+          AI next-price forecast: ${data.predictedNextPrice.toFixed(2)}
         </p>
       </div>
       <div className="overflow-x-auto">
