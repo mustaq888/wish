@@ -14,7 +14,7 @@ export function Header({ authenticated, onLogout, productCount, categoryCount }:
             <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">Flipkart x Amazon vibe</span>
             <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">Live compare</span>
           </div>
-          <p className="font-display text-3xl font-extrabold text-ink">WishList </p>
+          <p className="font-display text-3xl font-extrabold text-ink">WishList comparision product</p>
           <p className="text-sm text-slate-500">Search, compare, and shortlist products across {categoryCount} sectors and {productCount}+ listings.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -28,7 +28,7 @@ export function Header({ authenticated, onLogout, productCount, categoryCount }:
               Logout
             </button>
           ) : (
-            <span className="rounded-full bg-coral/10 px-5 py-3 text-sm font-semibold text-coral">Login to save wishlist picks</span>
+            <span className="rounded-full bg-coral/10 px-5 py-3 text-sm font-semibold text-coral">Login</span>
           )}
         </div>
       </div>
